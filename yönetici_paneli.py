@@ -559,7 +559,12 @@ class yonetici(QWidget):
     
     
     
-    def buyProperty2(self):        
+    def buyProperty2(self):  
+        text = self.txtAlan.text() + " no'lu alan satın alındı"
+        lblIslem = QLabel(self)
+        lblIslem.setText(text)
+        oyuncuList[oyunSırası-1].islemList.append(lblIslem)
+          
         cursor = connection.cursor()
         cursor.execute("SELECT kalan_para FROM kullanıcı_bilgileri WHERE no = %s", str(oyunSırası))
         currPara = cursor.fetchone()
@@ -749,8 +754,14 @@ class yonetici(QWidget):
     
     
     def buyFood2(self):
-        miktar = int(self.txtMarket2.text())
+        text = self.txtMarket.text() + " no'lu marketten " + self.txtMarket2.text() + " yiyecek alındı"
+        lblIslem = QLabel(self)
+        lblIslem.setText(text)
+        oyuncuList[oyunSırası-1].islemList.append(lblIslem)
         
+        
+        miktar = int(self.txtMarket2.text())
+
         cursor = connection.cursor()
         cursor.execute("SELECT kalan_yemek FROM kullanıcı_bilgileri WHERE no = %s", str(oyunSırası))
         currYemek = cursor.fetchone()
@@ -886,6 +897,12 @@ class yonetici(QWidget):
     
     
     def buyItem2(self):
+        text = self.txtItem.text() + " no'lu mağazadan " + self.txtItem2.text() + " eşya alındı"
+        lblIslem = QLabel(self)
+        lblIslem.setText(text)
+        oyuncuList[oyunSırası-1].islemList.append(lblIslem)
+        
+        
         miktar = int(self.txtItem2.text())
         
         cursor = connection.cursor()
@@ -1031,6 +1048,12 @@ class yonetici(QWidget):
         
         
     def market(self):
+        text = self.txtIsletme.text() + " no'lu arsaya market kuruldu"
+        lblIslem = QLabel(self)
+        lblIslem.setText(text)
+        oyuncuList[oyunSırası-1].islemList.append(lblIslem)
+        
+        
         index = oyuncuList[oyunSırası-1].properties.index(self.txtIsletme.text())
         del oyuncuList[oyunSırası-1].properties[index]
         oyuncuList[oyunSırası-1].marketList.append(self.txtIsletme.text())
@@ -1109,6 +1132,10 @@ class yonetici(QWidget):
     
     
     def magaza(self):
+        text = self.txtIsletme.text() + " no'lu arsaya mağaza kuruldu"
+        lblIslem = QLabel(self)
+        lblIslem.setText(text)
+        oyuncuList[oyunSırası-1].islemList.append(lblIslem)
         
         index = oyuncuList[oyunSırası-1].properties.index(self.txtIsletme.text())
         del oyuncuList[oyunSırası-1].properties[index]
@@ -1189,6 +1216,10 @@ class yonetici(QWidget):
         
         
     def emlak(self):
+        text = self.txtIsletme.text() + " no'lu arsaya emlakçı kuruldu"
+        lblIslem = QLabel(self)
+        lblIslem.setText(text)
+        oyuncuList[oyunSırası-1].islemList.append(lblIslem)
         
         index = oyuncuList[oyunSırası-1].properties.index(self.txtIsletme.text())
         del oyuncuList[oyunSırası-1].properties[index]
@@ -1278,7 +1309,7 @@ class yonetici(QWidget):
         self.btnChangePlayer.setVisible(False)
         self.btnIsKur.setVisible(False)
         self.btnIsegir.setVisible(False)
-    
+        
 
         text = "İşletmeler: "
         for oyuncu in oyuncuList:
@@ -1335,6 +1366,12 @@ class yonetici(QWidget):
     
     
     def Isegir2(self):
+        text = self.txtIsyeri.text() + " no'lu işletmede işe girildi"
+        lblIslem = QLabel(self)
+        lblIslem.setText(text)
+        oyuncuList[oyunSırası-1].islemList.append(lblIslem)
+        
+        
         
         bitisTarihi = datetime.datetime.today() + datetime.timedelta(days = int(self.txtGun.text()))        
         insert_boyut = "INSERT INTO çalışan_bilgileri (oyuncu_no, bitiş_tarihi, gün_sayısı, işletme_no, başlangıç_saati, bitiş_saati) VALUES (%s, %s, %s, %s, %s, %s)"
@@ -1396,11 +1433,59 @@ class yonetici(QWidget):
         length = len(noList)
         while(True):
             
-            if len(oyuncuList[oyunSırası-1].properties) > 2:
+            cursor = connection.cursor()
+            cursor.execute("SELECT alan_kare_no FROM alan_bilgileri WHERE alan_sahibi_no = %s AND alan_türü = %s", (str(oyuncuList[oyunSırası-1].no), "Arsa"))
+            arsaList = cursor.fetchall()
+            cursor.close()
+            
+            # arsa sayısı en fazla 2 olabilir
+            if len(arsaList) == 2:
                 self.btnBuyProperty.setEnabled(False)
+            else:
+                self.btnBuyProperty.setEnabled(True)
+            
+            if len(arsaList) == 0:
+                self.btnIsKur.setEnabled(False)
+            else:
+                self.btnIsKur.setEnabled(True)
+                
+            
+            # 1 yerde işe girilebilir
+            cursor = connection.cursor()
+            cursor.execute("SELECT işletme_no FROM çalışan_bilgileri WHERE oyuncu_no = %s", str(oyuncuList[oyunSırası-1].no))
+            isyeri = cursor.fetchone()
+            cursor.close()
+            if isyeri:
+                self.btnIsegir.setEnabled(False)
+            else:
+                self.btnIsegir.setEnabled(True)
             
             
-        
+            # satmak için arsa veya işletme olması lazım
+            cursor = connection.cursor()
+            cursor.execute("SELECT alan_kare_no FROM alan_bilgileri WHERE alan_sahibi_no = %s", str(oyuncuList[oyunSırası-1].no))
+            satılık = cursor.fetchone()
+            cursor.close()
+            if satılık:
+                self.btnSellProperty.setEnabled(True)
+            else:
+                self.btnSellProperty.setEnabled(False)
+                
+                
+            # Kiraya vermek için işletme olması lazım    
+            cursor = connection.cursor()
+            cursor.execute("SELECT alan_kare_no FROM alan_bilgileri WHERE alan_sahibi_no = %s AND alan_türü != %s ", (str(oyuncuList[oyunSırası-1].no), str("Arsa")))
+            kiralık = cursor.fetchone()
+            cursor.close()
+            if kiralık:
+                self.btnLetProperty.setEnabled(True)
+            else:
+                self.btnLetProperty.setEnabled(False)    
+
+            
+            
+            
+            
             cursor = connection.cursor()
             cursor.execute("SELECT isim FROM kullanıcı_bilgileri WHERE no = %s", str(oyunSırası))
             currPlayerName = cursor.fetchone()
@@ -1657,6 +1742,7 @@ class Player:
         # Çalıştığı yer
         self.workplace = None
         self.maas = 0
+        self.islemList = []
 
     # alan satın al
     def buy_property(self, property, price):
