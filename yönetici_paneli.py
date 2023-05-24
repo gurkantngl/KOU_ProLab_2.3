@@ -564,6 +564,18 @@ class yonetici(QWidget):
         lblIslem = QLabel(self)
         lblIslem.setText(text)
         oyuncuList[oyunSırası-1].islemList.append(lblIslem)
+        
+        if len(oyuncuList[oyunSırası-1].islemList) == 1:
+            oyuncuList[oyunSırası-1].islemList[-1].move(900, 600)
+            oyuncuList[oyunSırası-1].islemList[-1].setFixedSize(400, 30)
+            oyuncuList[oyunSırası-1].islemList[-1].setFont(self.myFont)        
+            oyuncuList[oyunSırası-1].islemList[-1].setVisible(True)
+        else:
+            y = oyuncuList[oyunSırası-1].islemList[-2].geometry().y()
+            oyuncuList[oyunSırası-1].islemList[-1].move(900, y+30)
+            oyuncuList[oyunSırası-1].islemList[-1].setFixedSize(400, 30)
+            oyuncuList[oyunSırası-1].islemList[-1].setFont(self.myFont)        
+            oyuncuList[oyunSırası-1].islemList[-1].setVisible(True)
           
         cursor = connection.cursor()
         cursor.execute("SELECT kalan_para FROM kullanıcı_bilgileri WHERE no = %s", str(oyunSırası))
@@ -759,6 +771,18 @@ class yonetici(QWidget):
         lblIslem.setText(text)
         oyuncuList[oyunSırası-1].islemList.append(lblIslem)
         
+        if len(oyuncuList[oyunSırası-1].islemList) == 1:
+            oyuncuList[oyunSırası-1].islemList[-1].move(900, 600)
+            oyuncuList[oyunSırası-1].islemList[-1].setFixedSize(400, 30)
+            oyuncuList[oyunSırası-1].islemList[-1].setFont(self.myFont)        
+            oyuncuList[oyunSırası-1].islemList[-1].setVisible(True)
+        else:
+            y = oyuncuList[oyunSırası-1].islemList[-2].geometry().y()
+            oyuncuList[oyunSırası-1].islemList[-1].move(900, y+30)
+            oyuncuList[oyunSırası-1].islemList[-1].setFixedSize(400, 30)
+            oyuncuList[oyunSırası-1].islemList[-1].setFont(self.myFont)        
+            oyuncuList[oyunSırası-1].islemList[-1].setVisible(True)
+        
         
         miktar = int(self.txtMarket2.text())
 
@@ -901,6 +925,18 @@ class yonetici(QWidget):
         lblIslem = QLabel(self)
         lblIslem.setText(text)
         oyuncuList[oyunSırası-1].islemList.append(lblIslem)
+        
+        if len(oyuncuList[oyunSırası-1].islemList) == 1:
+            oyuncuList[oyunSırası-1].islemList[-1].move(900, 600)
+            oyuncuList[oyunSırası-1].islemList[-1].setFixedSize(400, 30)
+            oyuncuList[oyunSırası-1].islemList[-1].setFont(self.myFont)        
+            oyuncuList[oyunSırası-1].islemList[-1].setVisible(True)
+        else:
+            y = oyuncuList[oyunSırası-1].islemList[-2].geometry().y()
+            oyuncuList[oyunSırası-1].islemList[-1].move(900, y+30)
+            oyuncuList[oyunSırası-1].islemList[-1].setFixedSize(400, 30)
+            oyuncuList[oyunSırası-1].islemList[-1].setFont(self.myFont)        
+            oyuncuList[oyunSırası-1].islemList[-1].setVisible(True)
         
         
         miktar = int(self.txtItem2.text())
@@ -1052,7 +1088,18 @@ class yonetici(QWidget):
         lblIslem = QLabel(self)
         lblIslem.setText(text)
         oyuncuList[oyunSırası-1].islemList.append(lblIslem)
-        
+           
+        if len(oyuncuList[oyunSırası-1].islemList) == 1:
+            oyuncuList[oyunSırası-1].islemList[-1].move(900, 600)
+            oyuncuList[oyunSırası-1].islemList[-1].setFixedSize(400, 30)
+            oyuncuList[oyunSırası-1].islemList[-1].setFont(self.myFont)        
+            oyuncuList[oyunSırası-1].islemList[-1].setVisible(True)
+        else:
+            y = oyuncuList[oyunSırası-1].islemList[-2].geometry().y()
+            oyuncuList[oyunSırası-1].islemList[-1].move(900, y+30)
+            oyuncuList[oyunSırası-1].islemList[-1].setFixedSize(400, 30)
+            oyuncuList[oyunSırası-1].islemList[-1].setFont(self.myFont)        
+            oyuncuList[oyunSırası-1].islemList[-1].setVisible(True)      
         
         index = oyuncuList[oyunSırası-1].properties.index(self.txtIsletme.text())
         del oyuncuList[oyunSırası-1].properties[index]
@@ -1137,6 +1184,18 @@ class yonetici(QWidget):
         lblIslem.setText(text)
         oyuncuList[oyunSırası-1].islemList.append(lblIslem)
         
+        if len(oyuncuList[oyunSırası-1].islemList) == 1:
+            oyuncuList[oyunSırası-1].islemList[-1].move(900, 600)
+            oyuncuList[oyunSırası-1].islemList[-1].setFixedSize(400, 30)
+            oyuncuList[oyunSırası-1].islemList[-1].setFont(self.myFont)        
+            oyuncuList[oyunSırası-1].islemList[-1].setVisible(True)
+        else:
+            y = oyuncuList[oyunSırası-1].islemList[-2].geometry().y()
+            oyuncuList[oyunSırası-1].islemList[-1].move(900, y+30)
+            oyuncuList[oyunSırası-1].islemList[-1].setFixedSize(400, 30)
+            oyuncuList[oyunSırası-1].islemList[-1].setFont(self.myFont)        
+            oyuncuList[oyunSırası-1].islemList[-1].setVisible(True)
+        
         index = oyuncuList[oyunSırası-1].properties.index(self.txtIsletme.text())
         del oyuncuList[oyunSırası-1].properties[index]
         oyuncuList[oyunSırası-1].magazaList.append(self.txtIsletme.text())
@@ -1220,6 +1279,18 @@ class yonetici(QWidget):
         lblIslem = QLabel(self)
         lblIslem.setText(text)
         oyuncuList[oyunSırası-1].islemList.append(lblIslem)
+        
+        if len(oyuncuList[oyunSırası-1].islemList) == 1:
+            oyuncuList[oyunSırası-1].islemList[-1].move(900, 600)
+            oyuncuList[oyunSırası-1].islemList[-1].setFixedSize(400, 30)
+            oyuncuList[oyunSırası-1].islemList[-1].setFont(self.myFont)        
+            oyuncuList[oyunSırası-1].islemList[-1].setVisible(True)
+        else:
+            y = oyuncuList[oyunSırası-1].islemList[-2].geometry().y()
+            oyuncuList[oyunSırası-1].islemList[-1].move(900, y+30)
+            oyuncuList[oyunSırası-1].islemList[-1].setFixedSize(400, 30)
+            oyuncuList[oyunSırası-1].islemList[-1].setFont(self.myFont)        
+            oyuncuList[oyunSırası-1].islemList[-1].setVisible(True)
         
         index = oyuncuList[oyunSırası-1].properties.index(self.txtIsletme.text())
         del oyuncuList[oyunSırası-1].properties[index]
@@ -1371,6 +1442,17 @@ class yonetici(QWidget):
         lblIslem.setText(text)
         oyuncuList[oyunSırası-1].islemList.append(lblIslem)
         
+        if len(oyuncuList[oyunSırası-1].islemList) == 1:
+            oyuncuList[oyunSırası-1].islemList[-1].move(900, 600)
+            oyuncuList[oyunSırası-1].islemList[-1].setFixedSize(400, 30)
+            oyuncuList[oyunSırası-1].islemList[-1].setFont(self.myFont)        
+            oyuncuList[oyunSırası-1].islemList[-1].setVisible(True)
+        else:
+            y = oyuncuList[oyunSırası-1].islemList[-2].geometry().y()
+            oyuncuList[oyunSırası-1].islemList[-1].move(900, y+30)
+            oyuncuList[oyunSırası-1].islemList[-1].setFixedSize(400, 30)
+            oyuncuList[oyunSırası-1].islemList[-1].setFont(self.myFont)        
+            oyuncuList[oyunSırası-1].islemList[-1].setVisible(True)
         
         
         bitisTarihi = datetime.datetime.today() + datetime.timedelta(days = int(self.txtGun.text()))        
@@ -1420,7 +1502,23 @@ class yonetici(QWidget):
             index += 1
             
         oyunSırası = noList[index]
+        
+        if oyunSırası == 1:
+            for i in range(len(oyuncuList[-1].islemList)):
+                oyuncuList[-1].islemList[i].setVisible(False)
+                
+        else:
+            for i in range(len(oyuncuList[oyunSırası-2].islemList)):
+                oyuncuList[oyunSırası-2].islemList[i].setVisible(False)
+        
 
+        for i in range (len(oyuncuList[oyunSırası-1].islemList)):
+            oyuncuList[oyunSırası-1].islemList[i].setFixedSize(400, 30)
+            oyuncuList[oyunSırası-1].islemList[i].move(900, 600+30*i)
+            oyuncuList[oyunSırası-1].islemList[i].setFont(self.myFont)        
+            oyuncuList[oyunSırası-1].islemList[i].setVisible(True)    
+            
+            
             
             
             
