@@ -1056,6 +1056,24 @@ class yonetici(QWidget):
         self.txtMaas.setVisible(True)
         
         
+        self.lblSaat = QLabel(self)
+        self.lblSaat.setText("Çalışan saatlerini girin: ")
+        self.lblSaat.setFixedSize(250, 70)
+        self.lblSaat.move(1650, 800)
+        self.lblSaat.setFont(self.myFont)
+        self.lblSaat.setVisible(True)
+        
+        self.txtSaat1 = QLineEdit(self)
+        self.txtSaat1.move(1800, 805)
+        self.txtSaat1.resize(30, 40)
+        self.txtSaat1.setVisible(True)
+        
+        self.txtSaat2 = QLineEdit(self)
+        self.txtSaat2.move(1830, 805)
+        self.txtSaat2.resize(30, 40)
+        self.txtSaat2.setVisible(True)
+        
+        
         self.btnMarket = QPushButton(self)
         self.btnMarket.setText("Market")
         self.btnMarket.setFont(self.myFont)
@@ -1150,8 +1168,8 @@ class yonetici(QWidget):
         self.buttonList[int(self.txtIsletme.text())-1].setText(str(self.txtIsletme.text()) + "\n" + "Alan Türü: Market" + "\n" + "Alan Sahibi: " + str(currPlayerName) + " " + str(currPlayerSurName) + "\n" + "Çalışan Kapasitesi: 3")
 
 
-        insert_boyut = "INSERT INTO işletme_bilgileri (alan_kare_no, işletme_seviyesi, çalışan_kapasitesi, çalışan_sayısı, sabit_gelir_miktarı, sabit_gelir_oranı, işletme_türü, maas) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
-        inserted_values = (self.txtIsletme.text(), str(1), str(3), str(0), str(50), str(50), str("Market"), str(self.txtMaas.text()))
+        insert_boyut = "INSERT INTO işletme_bilgileri (alan_kare_no, işletme_seviyesi, çalışan_kapasitesi, çalışan_sayısı, sabit_gelir_miktarı, sabit_gelir_oranı, işletme_türü, maas, başlangıç_saati, bitiş_saati) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        inserted_values = (self.txtIsletme.text(), str(1), str(3), str(0), str(50), str(50), str("Market"), str(self.txtMaas.text()), str(self.txtSaat1.text()), str(self.txtSaat2.text()))
         cursor = connection.cursor()
         cursor.execute(insert_boyut, inserted_values)
         cursor.close()
@@ -1165,6 +1183,9 @@ class yonetici(QWidget):
         self.btnEmlak.close()
         self.lblMaas.close()
         self.txtMaas.close()
+        self.lblSaat.close()
+        self.txtSaat1.close()
+        self.txtSaat2.close()
         
         self.btnBuyProperty.setVisible(True)
         self.btnRentProperty.setVisible(True)
@@ -1242,8 +1263,8 @@ class yonetici(QWidget):
         cursor.close()
         
         
-        insert_boyut = "INSERT INTO işletme_bilgileri (alan_kare_no, işletme_seviyesi, çalışan_kapasitesi, çalışan_sayısı, sabit_gelir_miktarı, sabit_gelir_oranı, işletme_türü, maas) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
-        inserted_values = (self.txtIsletme.text(), str(1), str(3), str(0), str(50), str(50), str("Market"), str(self.txtMaas.text()))
+        insert_boyut = "INSERT INTO işletme_bilgileri (alan_kare_no, işletme_seviyesi, çalışan_kapasitesi, çalışan_sayısı, sabit_gelir_miktarı, sabit_gelir_oranı, işletme_türü, maas, başlangıç_saati, bitiş_saati) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        inserted_values = (self.txtIsletme.text(), str(1), str(3), str(0), str(50), str(50), str("Market"), str(self.txtMaas.text()), str(self.txtSaat1.text()), str(self.txtSaat2.text()))
         cursor = connection.cursor()
         cursor.execute(insert_boyut, inserted_values)
         cursor.close()
@@ -1261,6 +1282,9 @@ class yonetici(QWidget):
         self.btnEmlak.close()
         self.lblMaas.close()
         self.txtMaas.close()
+        self.lblSaat.close()
+        self.txtSaat1.close()
+        self.txtSaat2.close()
         
         self.btnBuyProperty.setVisible(True)
         self.btnRentProperty.setVisible(True)
@@ -1338,7 +1362,7 @@ class yonetici(QWidget):
         cursor.close()
         
         
-        insert_boyut = "INSERT INTO işletme_bilgileri (alan_kare_no, işletme_seviyesi, çalışan_kapasitesi, çalışan_sayısı, sabit_gelir_miktarı, sabit_gelir_oranı, işletme_türü, maas) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+        insert_boyut = "INSERT INTO işletme_bilgileri (alan_kare_no, işletme_seviyesi, çalışan_kapasitesi, çalışan_sayısı, sabit_gelir_miktarı, sabit_gelir_oranı, işletme_türü, maas, başlangıç_saati, bitiş_saati) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
         inserted_values = (self.txtIsletme.text(), str(1), str(3), str(0), str(50), str(50), str("Market"), str(self.txtMaas.text()))
         cursor = connection.cursor()
         cursor.execute(insert_boyut, inserted_values)
@@ -1357,6 +1381,9 @@ class yonetici(QWidget):
         self.btnEmlak.close()
         self.lblMaas.close()
         self.txtMaas.close()
+        self.lblSaat.close()
+        self.txtSaat1.close()
+        self.txtSaat2.close()
         
         self.btnBuyProperty.setVisible(True)
         self.btnRentProperty.setVisible(True)
@@ -1385,11 +1412,58 @@ class yonetici(QWidget):
         text = "İşletmeler: "
         for oyuncu in oyuncuList:
             for market in oyuncu.marketList:
-                text += market + ", "
+                cursor = connection.cursor()
+                cursor.execute("SELECT çalışan_kapasitesi FROM işletme_bilgileri WHERE alan_kare_no = %s", str(market))
+                kapasite = cursor.fetchone()
+                if kapasite:
+                    kapasite = kapasite[0]
+                cursor.close()
+                
+                cursor = connection.cursor()
+                cursor.execute("SELECT çalışan_sayısı FROM işletme_bilgileri WHERE alan_kare_no = %s", str(market))
+                calisan = cursor.fetchone()
+                if calisan:
+                    calisan = calisan[0]
+                cursor.close()
+
+                if int(calisan) != int(kapasite):
+                    text += market + ", "
+                    
             for magaza in oyuncu.magazaList:
-                text += magaza + ", "
+                cursor = connection.cursor()
+                cursor.execute("SELECT çalışan_kapasitesi FROM işletme_bilgileri WHERE alan_kare_no = %s", str(magaza))
+                kapasite = cursor.fetchone()
+                if kapasite:
+                    kapasite = kapasite[0]
+                cursor.close()
+                
+                cursor = connection.cursor()
+                cursor.execute("SELECT çalışan_sayısı FROM işletme_bilgileri WHERE alan_kare_no = %s", str(magaza))
+                calisan = cursor.fetchone()
+                if calisan:
+                    calisan = calisan[0]
+                cursor.close()
+
+                if int(calisan) != int(kapasite):
+                    text += magaza + ", "
+                    
             for emlak in oyuncu.emlakList:
-                text += emlak + ", "
+                cursor = connection.cursor()
+                cursor.execute("SELECT çalışan_kapasitesi FROM işletme_bilgileri WHERE alan_kare_no = %s", str(emlak))
+                kapasite = cursor.fetchone()
+                if kapasite:
+                    kapasite = kapasite[0]
+                cursor.close()
+                
+                cursor = connection.cursor()
+                cursor.execute("SELECT çalışan_sayısı FROM işletme_bilgileri WHERE alan_kare_no = %s", str(emlak))
+                calisan = cursor.fetchone()
+                if calisan:
+                    calisan = calisan[0]
+                cursor.close()
+
+                if int(calisan) != int(kapasite):
+                    text += emlak + ", "
         
         
         self.lblIsegir = QLabel(self)
@@ -1437,6 +1511,22 @@ class yonetici(QWidget):
     
     
     def Isegir2(self):
+        cursor = connection.cursor()
+        cursor.execute("SELECT çalışan_sayısı FROM işletme_bilgileri WHERE alan_kare_no = %s", str(self.txtIsyeri.text()))
+        calisan = cursor.fetchone()
+        cursor.close()
+        if calisan:
+            calisan = calisan[0]
+            calisan = int(calisan) + 1
+        
+        
+        updateQuery = "UPDATE işletme_bilgileri SET çalışan_sayısı = %s WHERE alan_kare_no = %s"
+        cursor = connection.cursor()
+        cursor.execute(updateQuery, (str(calisan), str(self.txtIsyeri.text())))
+        cursor.close()
+        
+        
+        
         text = self.txtIsyeri.text() + " no'lu işletmede işe girildi"
         lblIslem = QLabel(self)
         lblIslem.setText(text)
@@ -1455,9 +1545,24 @@ class yonetici(QWidget):
             oyuncuList[oyunSırası-1].islemList[-1].setVisible(True)
         
         
-        bitisTarihi = datetime.datetime.today() + datetime.timedelta(days = int(self.txtGun.text()))        
+        bitisTarihi = datetime.datetime.today() + datetime.timedelta(days = int(self.txtGun.text()))
+        
+        cursor = connection.cursor()
+        cursor.execute("SELECT başlangıç_saati FROM işletme_bilgileri WHERE alan_kare_no = %s", str(self.txtIsyeri.text()))
+        saat1 = cursor.fetchone()
+        if saat1:
+            saat1 = saat1[0]
+        cursor.close()
+        
+        cursor = connection.cursor()
+        cursor.execute("SELECT bitiş_saati FROM işletme_bilgileri WHERE alan_kare_no = %s", str(self.txtIsyeri.text()))
+        saat2 = cursor.fetchone()
+        if saat2:
+            saat2 = saat2[0]
+        cursor.close()
+            
         insert_boyut = "INSERT INTO çalışan_bilgileri (oyuncu_no, bitiş_tarihi, gün_sayısı, işletme_no, başlangıç_saati, bitiş_saati) VALUES (%s, %s, %s, %s, %s, %s)"
-        inserted_values = (oyuncuList[oyunSırası-1].no, bitisTarihi, self.txtGun.text(), str(self.txtIsyeri.text()), str(9), str(17))
+        inserted_values = (oyuncuList[oyunSırası-1].no, bitisTarihi, self.txtGun.text(), str(self.txtIsyeri.text()), str(saat1), str(saat2))
         cursor = connection.cursor()
         cursor.execute(insert_boyut, inserted_values)
         cursor.close()
@@ -1520,8 +1625,6 @@ class yonetici(QWidget):
             
             
             
-            
-            
     def thread(self):
         global connection
         global kullanıcı_no
@@ -1530,69 +1633,16 @@ class yonetici(QWidget):
         curDate = datetime.datetime.today().date()
         length = len(noList)
         while(True):
-            
+            oyunSırasi = oyunSırası    
             cursor = connection.cursor()
-            cursor.execute("SELECT alan_kare_no FROM alan_bilgileri WHERE alan_sahibi_no = %s AND alan_türü = %s", (str(oyuncuList[oyunSırası-1].no), "Arsa"))
-            arsaList = cursor.fetchall()
-            cursor.close()
-            
-            # arsa sayısı en fazla 2 olabilir
-            if len(arsaList) == 2:
-                self.btnBuyProperty.setEnabled(False)
-            else:
-                self.btnBuyProperty.setEnabled(True)
-            
-            if len(arsaList) == 0:
-                self.btnIsKur.setEnabled(False)
-            else:
-                self.btnIsKur.setEnabled(True)
-                
-            
-            # 1 yerde işe girilebilir
-            cursor = connection.cursor()
-            cursor.execute("SELECT işletme_no FROM çalışan_bilgileri WHERE oyuncu_no = %s", str(oyuncuList[oyunSırası-1].no))
-            isyeri = cursor.fetchone()
-            cursor.close()
-            if isyeri:
-                self.btnIsegir.setEnabled(False)
-            else:
-                self.btnIsegir.setEnabled(True)
-            
-            
-            # satmak için arsa veya işletme olması lazım
-            cursor = connection.cursor()
-            cursor.execute("SELECT alan_kare_no FROM alan_bilgileri WHERE alan_sahibi_no = %s", str(oyuncuList[oyunSırası-1].no))
-            satılık = cursor.fetchone()
-            cursor.close()
-            if satılık:
-                self.btnSellProperty.setEnabled(True)
-            else:
-                self.btnSellProperty.setEnabled(False)
-                
-                
-            # Kiraya vermek için işletme olması lazım    
-            cursor = connection.cursor()
-            cursor.execute("SELECT alan_kare_no FROM alan_bilgileri WHERE alan_sahibi_no = %s AND alan_türü != %s ", (str(oyuncuList[oyunSırası-1].no), str("Arsa")))
-            kiralık = cursor.fetchone()
-            cursor.close()
-            if kiralık:
-                self.btnLetProperty.setEnabled(True)
-            else:
-                self.btnLetProperty.setEnabled(False)    
-
-            
-            
-            
-            
-            cursor = connection.cursor()
-            cursor.execute("SELECT isim FROM kullanıcı_bilgileri WHERE no = %s", str(oyunSırası))
+            cursor.execute("SELECT isim FROM kullanıcı_bilgileri WHERE no = %s", str(oyunSırasi))
             currPlayerName = cursor.fetchone()
             if currPlayerName:
                 currPlayerName = currPlayerName[0]
             cursor.close()
             
             cursor = connection.cursor()
-            cursor.execute("SELECT soyİsim FROM kullanıcı_bilgileri WHERE no = %s", str(oyunSırası))
+            cursor.execute("SELECT soyİsim FROM kullanıcı_bilgileri WHERE no = %s", str(oyunSırasi))
             currPlayerSurName = cursor.fetchone()
             cursor.close()
             if currPlayerSurName:
@@ -1609,7 +1659,7 @@ class yonetici(QWidget):
 
                 for i in range(length):
                     cursor = connection.cursor()
-                    cursor.execute("SELECT kalan_yemek FROM kullanıcı_bilgileri WHERE no = %s", str(noList[i]))
+                    cursor.execute("SELECT kalan_yemek FROM kullanıcı_bilgileri WHERE no = %s", str(oyuncuList[oyunSırasi-1].no))
                     yemek = cursor.fetchone()
                     cursor.close()
                     
@@ -1621,7 +1671,7 @@ class yonetici(QWidget):
                         oyuncuList[i].food = yemek
                         
                     cursor = connection.cursor()   
-                    cursor.execute("SELECT kalan_eşya FROM kullanıcı_bilgileri WHERE no = %s", str(noList[i]))
+                    cursor.execute("SELECT kalan_eşya FROM kullanıcı_bilgileri WHERE no = %s", str(oyuncuList[oyunSırasi-1].no))
                     eşya = cursor.fetchone()
                     cursor.close()
                     
@@ -1633,7 +1683,7 @@ class yonetici(QWidget):
                         oyuncuList[i].item = eşya
                         
                     cursor = connection.cursor()    
-                    cursor.execute("SELECT kalan_para FROM kullanıcı_bilgileri WHERE no = %s", str(noList[i]))
+                    cursor.execute("SELECT kalan_para FROM kullanıcı_bilgileri WHERE no = %s", str(oyuncuList[oyunSırasi-1].no))
                     para = cursor.fetchone()
                     cursor.close()
                     
@@ -1653,11 +1703,11 @@ class yonetici(QWidget):
                     oyuncuList[i].money = para                                        
                     updateQuery = "UPDATE kullanıcı_bilgileri SET kalan_yemek = %s, kalan_eşya = %s, kalan_para = %s WHERE no = %s"
                     cursor = connection.cursor()
-                    cursor.execute(updateQuery, (str(yemek), str(eşya), str(para), str(noList[i])))
+                    cursor.execute(updateQuery, (str(yemek), str(eşya), str(para), str(oyuncuList[oyunSırasi-1].no)))
                     cursor.close()
                         
                     cursor = connection.cursor()
-                    cursor.execute("SELECT kalan_yemek FROM kullanıcı_bilgileri WHERE no = %s",(str(noList[i])))
+                    cursor.execute("SELECT kalan_yemek FROM kullanıcı_bilgileri WHERE no = %s",(str(oyuncuList[oyunSırasi-1].no)))
                     nyemek = cursor.fetchone()
                     cursor.close()
                     
@@ -1666,7 +1716,7 @@ class yonetici(QWidget):
                     self.lblList[i][3].setText("Yemek: " + str(nyemek))
                     
                     cursor = connection.cursor()
-                    cursor.execute("SELECT kalan_eşya FROM kullanıcı_bilgileri WHERE no = %s",(str(noList[i])))
+                    cursor.execute("SELECT kalan_eşya FROM kullanıcı_bilgileri WHERE no = %s",(str(oyuncuList[oyunSırasi-1].no)))
                     neşya = cursor.fetchone()
                     cursor.close()
                     
@@ -1675,7 +1725,7 @@ class yonetici(QWidget):
                     self.lblList[i][4].setText("Eşya: " + str(neşya))
                     
                     cursor = connection.cursor()
-                    cursor.execute("SELECT kalan_para FROM kullanıcı_bilgileri WHERE no = %s",(str(noList[i])))
+                    cursor.execute("SELECT kalan_para FROM kullanıcı_bilgileri WHERE no = %s",(str(oyuncuList[oyunSırasi-1].no)))
                     npara = cursor.fetchone()
                     cursor.close()
                     if npara:
@@ -1819,6 +1869,181 @@ class yonetici(QWidget):
                                 cursor.execute("DELETE FROM çalışan_bilgileri WHERE oyuncu_no = %s",str(oyuncu.no))
                                 cursor.close()
                                 oyuncu.maas = 0
+                    
+                cursor = connection.cursor()
+                cursor.execute("SELECT alan_kare_no FROM işletme_bilgileri")
+                isletmeList = cursor.fetchall()
+                cursor.close()
+                for isletme in isletmeList:
+                    isletme = isletme[0]
+                    cursor = connection.cursor()
+                    cursor.execute("SELECT çalışan_kapasitesi FROM işletme_bilgileri WHERE alan_kare_no = %s", (str(isletme)))
+                    kapasite = cursor.fetchone()
+                    cursor.close()
+                    if kapasite:
+                        kapasite = kapasite[0]
+                        kapasite = int(kapasite)
+                        
+                    cursor = connection.cursor()
+                    cursor.execute("SELECT çalışan_sayısı FROM işletme_bilgileri WHERE alan_kare_no = %s", (str(isletme)))
+                    calisan = cursor.fetchone()
+                    cursor.close()
+                    if calisan:
+                        calisan = calisan[0]
+                        calisan = int(calisan)
+                    
+                    if int(calisan) == int(kapasite):
+                        cursor = connection.cursor()
+                        cursor.execute("SELECT tam_kapasite_gun_sayısı FROM işletme_bilgileri WHERE alan_kare_no = %s", (str(isletme)))
+                        tamGun = cursor.fetchone()
+                        cursor.close()
+                        if tamGun:
+                            tamGun = tamGun[0]
+                            tamGun = int(tamGun)
+                            tamGun += self.fark
+                        
+                        if tamGun >= 7:
+                            tamGun -= 7
+                            
+                            updateQuery = "UPDATE işletme_bilgileri SET tam_kapasite_gun_sayısı = %s WHERE alan_kare_no = %s"
+                            cursor = connection.cursor()
+                            cursor.execute(updateQuery, (str(tamGun), str(isletme)))
+                            cursor.close()
+                                
+                            kapasite *= 2
+                            
+                            cursor = connection.cursor()
+                            cursor.execute("SELECT işletme_seviyesi FROM işletme_bilgileri WHERE alan_kare_no = %s", (str(isletme)))
+                            seviye = cursor.fetchone()
+                            cursor.close()
+                            if seviye:
+                                seviye = seviye[0]
+                                seviye = int(seviye)
+                                seviye += 1
+                                
+                            updateQuery = "UPDATE işletme_bilgileri SET işletme_seviyesi = %s WHERE alan_kare_no = %s"
+                            cursor = connection.cursor()
+                            cursor.execute(updateQuery, (str(seviye), str(isletme)))
+                            cursor.close()
+                            
+                            current_date = datetime.datetime.now().date()
+                            
+                            updateQuery = "UPDATE işletme_bilgileri SET seviye_tarihi = %s WHERE alan_kare_no = %s"
+                            cursor = connection.cursor()
+                            cursor.execute(updateQuery, (current_date, str(isletme)))
+                            cursor.close()
+                            
+                        else:
+                        
+                            updateQuery = "UPDATE işletme_bilgileri SET tam_kapasite_gun_sayısı = %s WHERE alan_kare_no = %s"
+                            cursor = connection.cursor()
+                            cursor.execute(updateQuery, (str(tamGun), str(isletme)))
+                            cursor.close()
+                    
+                    else:
+                        updateQuery = "UPDATE işletme_bilgileri SET tam_kapasite_gun_sayısı = %s WHERE alan_kare_no = %s"
+                        cursor = connection.cursor()
+                        cursor.execute(updateQuery, (str(0), str(isletme)))
+                        cursor.close()
+                    
+                    
+                                
+                                
+            cursor = connection.cursor()
+            cursor.execute("SELECT işletme_no FROM çalışan_bilgileri WHERE oyuncu_no = %s", str(oyuncuList[oyunSırası-1].no))
+            isyeri = None
+            isyeri = cursor.fetchone()
+            cursor.close()
+            self.tf = True
+            if isyeri:
+                cursor = connection.cursor()
+                cursor.execute("SELECT başlangıç_saati FROM çalışan_bilgileri WHERE oyuncu_no = %s", str(oyuncuList[oyunSırası-1].no))
+                saat1 = cursor.fetchone()
+                cursor.close()
+                if saat1:
+                    saat1 = saat1[0]
+                    
+                cursor = connection.cursor()
+                cursor.execute("SELECT bitiş_saati FROM çalışan_bilgileri WHERE oyuncu_no = %s", str(oyuncuList[oyunSırası-1].no))
+                saat2 = cursor.fetchone()
+                cursor.close()
+                if saat2:
+                    saat2 = saat2[0]
+                    
+                nowSaat = datetime.datetime.now().hour
+                try:
+                    if int(saat1) <= int(nowSaat) and int(nowSaat) <= int(saat2):
+                        self.tf = False
+                    
+                    self.btnBuyProperty.setEnabled(self.tf)
+                    self.btnRentProperty.setEnabled(self.tf)
+                    self.btnSellProperty.setEnabled(self.tf)
+                    self.btnLetProperty.setEnabled(self.tf)
+                    self.btnBuyFood.setEnabled(self.tf)
+                    self.btnBuyItem.setEnabled(self.tf)
+                    self.btnIsKur.setEnabled(self.tf)
+                    self.btnIsegir.setEnabled(self.tf)
+                except:
+                    pass
+            
+            cursor = connection.cursor()
+            cursor.execute("SELECT alan_kare_no FROM alan_bilgileri WHERE alan_sahibi_no = %s AND alan_türü = %s", (str(oyuncuList[oyunSırası-1].no), "Arsa"))
+            arsaList = cursor.fetchall()
+            cursor.close()
+            
+            # arsa sayısı en fazla 2 olabilir
+            if len(arsaList) == 2:
+                self.btnBuyProperty.setEnabled(False)
+            else:
+                if self.tf:
+                    self.btnBuyProperty.setEnabled(True)
+            
+            if len(arsaList) == 0:
+                self.btnIsKur.setEnabled(False)
+            else:
+                if self.tf:
+                    self.btnIsKur.setEnabled(True)
+                
+            
+            # 1 yerde işe girilebilir
+            cursor = connection.cursor()
+            cursor.execute("SELECT işletme_no FROM çalışan_bilgileri WHERE oyuncu_no = %s", str(oyuncuList[oyunSırası-1].no))
+            isyeri = cursor.fetchone()
+            cursor.close()
+            if isyeri:
+                self.btnIsegir.setEnabled(False)
+            else:
+                if self.tf:
+                    self.btnIsegir.setEnabled(True)
+            
+            
+            # satmak için arsa veya işletme olması lazım
+            cursor = connection.cursor()
+            cursor.execute("SELECT alan_kare_no FROM alan_bilgileri WHERE alan_sahibi_no = %s", str(oyuncuList[oyunSırası-1].no))
+            satılık = cursor.fetchone()
+            cursor.close()
+            if satılık and self.tf:
+                self.btnSellProperty.setEnabled(True)
+            else:
+                self.btnSellProperty.setEnabled(False)
+                
+                
+            # Kiraya vermek için işletme olması lazım    
+            cursor = connection.cursor()
+            cursor.execute("SELECT alan_kare_no FROM alan_bilgileri WHERE alan_sahibi_no = %s AND alan_türü != %s ", (str(oyuncuList[oyunSırası-1].no), str("Arsa")))
+            kiralık = cursor.fetchone()
+            cursor.close()
+            if kiralık and self.tf:
+                self.btnLetProperty.setEnabled(True)
+            else:
+                self.btnLetProperty.setEnabled(False)
+            
+            
+            
+            
+                
+            
+            
 
 class Player:
     def __init__(self, no, first_name, last_name, password):
