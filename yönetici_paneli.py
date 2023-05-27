@@ -17,6 +17,7 @@ emlakList = []
 satılıkArsalar = []
 arsaFiyatı = 25
 isletmeFiyatı = 25
+sabitGelir = 50
 
 connection = psycopg2.connect(
     host="127.0.0.1",
@@ -1628,6 +1629,7 @@ class yonetici(QWidget):
     def thread(self):
         global connection
         global kullanıcı_no
+        global sabitGelir
         
         delete = []
         curDate = datetime.datetime.today().date()
@@ -1656,6 +1658,76 @@ class yonetici(QWidget):
                 self.fark = ((currDate - curDate).days)
                 self.fark = int(self.fark)
                 curDate = currDate
+                
+                cursor = connection.cursor()
+                cursor.execute("SELECT alan_kare_no FROM işletme_bilgileri")
+                liste = cursor.fetchall()
+                if liste:
+                    for i in range(len(liste)):
+                        liste[i] = liste[i][0]
+                        
+                        cursor = connection.cursor()
+                        cursor.execute("SELECT işletme_seviyesi FROM işletme_bilgileri WHERE alan_kare_no = %s", str(liste[i]))
+                        seviye = cursor.fetchone()
+                        if seviye:
+                            seviye = seviye[0]
+                        
+                        cursor = connection.cursor()
+                        cursor.execute("SELECT alan_sahibi_no FROM alan_bilgileri WHERE alan_kare_no = %s", str(liste[i]))
+                        sahip = cursor.fetchone()
+                        if sahip:
+                            sahip = sahip[0]
+                            
+                        cursor = connection.cursor()
+                        cursor.execute("SELECT kalan_para FROM kullanıcı_bilgileri WHERE no = %s",(str(sahip)))
+                        npara = cursor.fetchone()
+                        cursor.close()
+                        if npara:
+                            npara = npara[0]
+                            npara += (self.fark * seviye * sabitGelir)
+                        
+                        index = 0
+                        for i in range(len(oyuncuList)):
+                            if oyuncuList[i].no == sahip:
+                                index = i
+                                break
+                            
+                        oyuncuList[index].money = npara
+                                                                
+                        updateQuery = "UPDATE kullanıcı_bilgileri SET kalan_para = %s WHERE no = %s"
+                        cursor = connection.cursor()
+                        cursor.execute(updateQuery, (str(npara), str(sahip)))
+                        cursor.close()
+                        
+                    
+                
+                """
+                cursor = connection.cursor()
+                cursor.execute("SELECT alan_sahibi_no FROM alan_bilgileri WHERE alan_türü != %s AND alan_sahibi_no != %s", (str("Arsa"), str(0)))
+                liste = cursor.fetchall()
+                if liste:
+                    for i in range(len(liste)):
+                        liste[i] = liste[i][0]
+                cursor.close()
+                kume = list(set(liste))
+                
+                for i in range(len(kume)):
+                    sayı = liste.count(kume[i])
+
+                    cursor = connection.cursor()
+                    cursor.execute("SELECT kalan_para FROM kullanıcı_bilgileri WHERE no = %s",(str(kume[i])))
+                    currPara = cursor.fetchone()
+                    cursor.close()
+                    if currPara:
+                        currPara = int(currPara[0])
+                        currPara += (self.fark * sayı * sabitGelir)
+
+                    updateQuery = "UPDATE kullanıcı_bilgileri SET kalan_para = %s WHERE no = %s"
+                    cursor = connection.cursor()
+                    cursor.execute(updateQuery, (str(currPara), str(kume[i])))
+                    oyuncuList[i].money = currPara
+                    cursor.close()
+                    """
 
                 for i in range(length):
                     cursor = connection.cursor()
