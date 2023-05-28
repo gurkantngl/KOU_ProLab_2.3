@@ -18,6 +18,7 @@ satılıkArsalar = []
 arsaFiyatı = 25
 isletmeFiyatı = 25
 sabitGelir = 50
+komisyon = 10
 
 connection = psycopg2.connect(
     host="127.0.0.1",
@@ -43,6 +44,10 @@ cursor.close()
 
 cursor = connection.cursor()
 cursor.execute("DELETE FROM kiralama_bilgileri")
+cursor.close()
+
+cursor = connection.cursor()
+cursor.execute("DELETE FROM satılık_alan_bilgileri")
 cursor.close()
 
 cursor = connection.cursor()
@@ -409,7 +414,7 @@ class yonetici(QWidget):
                 cursor.close()
                 self.buttonList[i].setText(str(i+1) + "\n" + "Alan Türü: Arsa" + "\n" + "Alan Sahibi: Yönetici")
             
-                insert_table = "INSERT INTO satış_bilgileri (alan_kare_no, satış_fiyatı, komisyon, satan_emlak_no, alan_türü) VALUES (%s, %s, %s, %s, %s)"
+                insert_table = "INSERT INTO satılık_alan_bilgileri (alan_kare_no, satış_fiyatı, komisyon, satan_emlak_no, alan_türü) VALUES (%s, %s, %s, %s, %s)"
                 inserted_values = (str(i + 1), str(arsaFiyatı), str(0), str(x*y-3), "Arsa")
                 cursor = connection.cursor()
                 cursor.execute(insert_table, inserted_values)
@@ -523,15 +528,15 @@ class yonetici(QWidget):
         arsaList = cursor.fetchall()
         cursor.close()
         
-        text = "Arsalar: "
+        textArsa = "Arsalar: "
         
         for arsa in arsaList:
             arsa = arsa[0]
-            text += str(arsa) + ", "
+            textArsa += str(arsa) + ", "
         
         
         self.lblBuyProperty = QLabel(self)
-        self.lblBuyProperty.setText(text)
+        self.lblBuyProperty.setText(textArsa)
         self.lblBuyProperty.setFixedSize(900, 70)
         self.lblBuyProperty.move(1200, 700)
         self.lblBuyProperty.setFont(self.myFont)
@@ -587,16 +592,53 @@ class yonetici(QWidget):
         
         
         cursor = connection.cursor()
-        cursor.execute("SELECT komisyon FROM satış_bilgileri WHERE alan_kare_no = %s", str(self.txtAlan.text()))
+        cursor.execute("SELECT komisyon FROM satılık_alan_bilgileri WHERE alan_kare_no = %s", str(self.txtAlan.text()))
         komisyon = cursor.fetchone()
         if komisyon:
             komisyon = komisyon[0]
         cursor.close()
         
+        cursor = connection.cursor()
+        cursor.execute("SELECT alan_sahibi_no FROM alan_bilgileri WHERE alan_kare_no = %s", str(self.txtAlan.text()))
+        eskiSahip = cursor.fetchone()
+        if eskiSahip:
+            eskiSahip = eskiSahip[0]
+        cursor.close()
+        
+        if str(eskiSahip) != str(0): 
+            cursor = connection.cursor()
+            cursor.execute("SELECT kalan_para FROM kullanıcı_bilgileri WHERE no = %s", str(eskiSahip))
+            eskiPara = cursor.fetchone()
+            cursor.close()
+            if eskiPara:
+                eskiPara = int(eskiPara[0])
+
+            
+            eskiPara -= komisyon
+        
+            updateQuery = "UPDATE kullanıcı_bilgileri SET kalan_para = %s WHERE no = %s"
+            cursor = connection.cursor()
+            cursor.execute(updateQuery, (eskiPara, eskiSahip))
+            cursor.close()
+            
+            eskiIndex = 0
+            for i in range(len(oyuncuList)):
+                if str(oyuncuList[i].no) == str(eskiSahip):
+                    eskiIndex = i
+                    break
+            self.lblList[eskiIndex][5].setText("Para: " + str(eskiPara))
+            
+        
+        cursor = connection.cursor()
+        cursor.execute("SELECT satış_fiyatı FROM satılık_alan_bilgileri WHERE alan_kare_no = %s", str(self.txtAlan.text()))
+        fiyat = cursor.fetchone()
+        if fiyat:
+            fiyat = fiyat[0]
+        cursor.close()
         
         updateQuery = "UPDATE kullanıcı_bilgileri SET kalan_para = %s WHERE no = %s"
         cursor = connection.cursor()
-        cursor.execute(updateQuery, (str(int(currPara) - int(arsaFiyatı) - int(komisyon)), str(oyunSırası)))
+        cursor.execute(updateQuery, (str(int(currPara) - int(fiyat) - int(komisyon)), str(oyunSırası)))
         cursor.close()
         
         cursor = connection.cursor()
@@ -610,12 +652,20 @@ class yonetici(QWidget):
         self.lblList[oyunSırası-1][5].setText("Para: " + str(currPara))
         
         
+        cursor = connection.cursor()
+        cursor.execute("SELECT alan_sahibi_no FROM alan_bilgileri WHERE alan_kare_no = %s",(str(self.txtAlan.text())))
+        eskiSahip = cursor.fetchone()
+        cursor.close()
+        if eskiSahip:
+            eskiSahip = eskiSahip[0]
+        
+        
+        
         updateQuery = "UPDATE alan_bilgileri SET alan_sahibi_no = %s WHERE alan_kare_no = %s"
         cursor = connection.cursor()
         cursor.execute(updateQuery, (str(oyunSırası), str(self.txtAlan.text())))
         cursor.close()
         
-        oyuncuList[oyunSırası-1].properties.append(self.txtAlan.text())
         
         cursor = connection.cursor()
         cursor.execute("SELECT isim FROM kullanıcı_bilgileri WHERE no = %s", str(oyunSırası))
@@ -631,10 +681,33 @@ class yonetici(QWidget):
             soyİsim = soyİsim[0]
         cursor.close()
         
-        self.buttonList[int(self.txtAlan.text())-1].setText(str(self.txtAlan.text()) + "\n" + "Alan Türü: Arsa" + "\n" + "Alan Sahibi: " + str(isim) + " " + str(soyİsim))
+        cursor = connection.cursor()
+        cursor.execute("SELECT alan_türü FROM satılık_alan_bilgileri WHERE alan_kare_no = %s", str(self.txtAlan.text()))
+        alanTuru = cursor.fetchone()
+        if alanTuru:
+            alanTuru = alanTuru[0]
+        cursor.close()
+        
+        if alanTuru == "Arsa":
+            oyuncuList[oyunSırası-1].properties.append(self.txtAlan.text())
+        elif alanTuru == "Market":
+            oyuncuList[oyunSırası-1].marketList.append(self.txtAlan.text())
+        elif alanTuru == "Mağaza":
+            oyuncuList[oyunSırası-1].magazaList.append(self.txtAlan.text())
+        elif alanTuru == "Emlak":
+            oyuncuList[oyunSırası-1].emlakList.append(self.txtAlan.text())
+        
+        self.buttonList[int(self.txtAlan.text())-1].setText(str(self.txtAlan.text()) + "\n" + "Alan Türü: " + str(alanTuru) + "\n" + "Alan Sahibi: " + str(isim) + " " + str(soyİsim))
+        
+        insert_boyut = "INSERT INTO satış_bilgileri (alan_kare_no, satan_kullanıcı_no, satın_alan_kullanıcı_no) VALUES (%s, %s, %s)"
+        inserted_values = (self.txtAlan.text(), str(eskiSahip), str(oyuncuList[oyunSırası-1].no))
+        cursor = connection.cursor()
+        cursor.execute(insert_boyut, inserted_values)
+        cursor.close()
+        
         
         cursor = connection.cursor()
-        cursor.execute("DELETE FROM satış_bilgileri WHERE alan_kare_no = %s",str(self.txtAlan.text()))
+        cursor.execute("DELETE FROM satılık_alan_bilgileri WHERE alan_kare_no = %s",str(self.txtAlan.text()))
         cursor.close()
         connection.commit()
         
@@ -672,6 +745,91 @@ class yonetici(QWidget):
         self.btnIsegir.setVisible(False)
     
     
+        textKira = "Kiralık Alanlar: "
+        cursor = connection.cursor()
+        cursor.execute("SELECT alan_kare_no FROM alan_bilgileri WHERE alan_türü = %s", (str("Emlak"),))
+        kiralık = cursor.fetchall()
+        cursor.close()
+        if kiralık:
+            for i in range(len(kiralık)):
+                kiralık[i] = kiralık[i][0]
+                textKira += str(kiralık[i])
+
+        
+        self.lblRentProperty = QLabel(self)
+        self.lblRentProperty.setText(textKira)
+        self.lblRentProperty.setFixedSize(900, 70)
+        self.lblRentProperty.move(1200, 670)
+        self.lblRentProperty.setFont(self.myFont)
+        self.lblRentProperty.setVisible(True)
+    
+        self.lblRentProperty1 = QLabel(self)
+        self.lblRentProperty1.setText("Kiralamak İstediğiniz Alan: ")
+        self.lblRentProperty1.setFixedSize(250, 30)
+        self.lblRentProperty1.move(1420, 700)
+        self.lblRentProperty1.setFont(self.myFont)
+        self.lblRentProperty1.setVisible(True)
+        
+        self.txtRent = QLineEdit(self)
+        self.txtRent.move(1560, 700)
+        self.txtRent.resize(60, 30)
+        self.txtRent.setVisible(True)
+    
+
+        self.lblRentProperty3 = QLabel(self)
+        self.lblRentProperty3.setText("Kiralama Süresi: ")
+        self.lblRentProperty3.setFixedSize(250, 30)
+        self.lblRentProperty3.move(1450, 740)
+        self.lblRentProperty3.setFont(self.myFont)
+        self.lblRentProperty3.setVisible(True)
+        
+        self.txtRent1 = QLineEdit(self)
+        self.txtRent1.move(1560, 740)
+        self.txtRent1.resize(60, 30)
+        self.txtRent1.setVisible(True)
+        
+        self.myFont.setPointSize(8)
+        self.btnRentProperty2 = QPushButton(self)
+        self.btnRentProperty2.setText("Kirala")
+        self.btnRentProperty2.setFont(self.myFont)
+        self.btnRentProperty2.clicked.connect(self.rentProperty2)
+        self.btnRentProperty2.setFixedSize(120, 60)
+        self.btnRentProperty2.move(1540, 825)
+        self.btnRentProperty2.setVisible(True)
+    
+    
+    def rentProperty2(self):
+        currDate = datetime.datetime.today().date()
+        bitisTarihi = datetime.datetime.today() + datetime.timedelta(days = int(self.txtRent1.text()))
+        
+        updateQuery = "UPDATE kiralama_bilgileri SET kira_süresi = %s, başlangıç_tarihi = %s, bitiş_tarihi = %s WHERE alan_kare_no = %s"
+        cursor = connection.cursor()
+        cursor.execute(updateQuery, (str(self.txtRent1.text()), currDate, bitisTarihi, str(self.txtRent.text())))
+        cursor.close()
+
+        
+    
+    
+        self.lblRentProperty.close()
+        self.lblRentProperty1.close()
+        self.txtRent.close()
+        self.lblRentProperty3.close()
+        self.txtRent1.close()
+        self.btnRentProperty2.close()
+        
+    
+        self.btnBuyProperty.setVisible(True)
+        self.btnRentProperty.setVisible(True)
+        self.btnSellProperty.setVisible(True)
+        self.btnLetProperty.setVisible(True)
+        self.btnBuyFood.setVisible(True)
+        self.btnBuyItem.setVisible(True)
+        self.btnChangePlayer.setVisible(True)
+        self.btnIsKur.setVisible(True)
+        self.btnIsegir.setVisible(True)
+        
+        
+    
     
     def sellProperty(self):
         self.btnBuyProperty.setVisible(False)
@@ -683,6 +841,160 @@ class yonetici(QWidget):
         self.btnChangePlayer.setVisible(False)
         self.btnIsKur.setVisible(False)
         self.btnIsegir.setVisible(False)
+        
+        
+        textSell = "Sahip olduğunuz alanlar: "
+        
+        x = int(self.txtX.text())
+        y = int(self.txtY.text())
+        
+        for arsa in oyuncuList[oyunSırası-1].properties:
+            textSell += str(arsa) + ", "
+        
+        for market in oyuncuList[oyunSırası-1].marketList:
+            textSell += str(market) + ", "
+            
+        for magaza in oyuncuList[oyunSırası-1].magazaList:
+            textSell += str(magaza)
+            
+        for emlak in oyuncuList[oyunSırası-1].emlakList:
+            textSell += str(emlak)
+            
+        textEmlak = "Emlakçılar: "
+        
+        cursor = connection.cursor()
+        cursor.execute("SELECT alan_kare_no FROM alan_bilgileri WHERE alan_türü = %s", (str("Emlak"),))
+        emlakcı = cursor.fetchall()
+        cursor.close()
+        if emlakcı:
+            for i in range(len(emlakcı)):
+                emlakcı[i] = emlakcı[i][0]
+                textEmlak += str(emlakcı[i]) + ", "
+        
+        self.lblSellProperty = QLabel(self)
+        self.lblSellProperty.setText(textSell)
+        self.lblSellProperty.setFixedSize(900, 70)
+        self.lblSellProperty.move(1200, 670)
+        self.lblSellProperty.setFont(self.myFont)
+        self.lblSellProperty.setVisible(True)
+        
+        self.lblSellProperty2 = QLabel(self)
+        self.lblSellProperty2.setText(textEmlak)
+        self.lblSellProperty2.setFixedSize(900, 70)
+        self.lblSellProperty2.move(1200, 720)
+        self.lblSellProperty2.setFont(self.myFont)
+        self.lblSellProperty2.setVisible(True)
+        
+        
+        self.lblSellProperty1 = QLabel(self)
+        self.lblSellProperty1.setText("Satacağınız Alan: ")
+        self.lblSellProperty1.setFixedSize(250, 30)
+        self.lblSellProperty1.move(1450, 700)
+        self.lblSellProperty1.setFont(self.myFont)
+        self.lblSellProperty1.setVisible(True)
+        
+        self.txtSell = QLineEdit(self)
+        self.txtSell.move(1560, 700)
+        self.txtSell.resize(60, 30)
+        self.txtSell.setVisible(True)
+        
+        
+        self.lblSellProperty3 = QLabel(self)
+        self.lblSellProperty3.setText("Emlakçı: ")
+        self.lblSellProperty3.setFixedSize(250, 30)
+        self.lblSellProperty3.move(1450, 740)
+        self.lblSellProperty3.setFont(self.myFont)
+        self.lblSellProperty3.setVisible(True)
+        
+        self.txtSell1 = QLineEdit(self)
+        self.txtSell1.move(1560, 740)
+        self.txtSell1.resize(60, 30)
+        self.txtSell1.setVisible(True)
+        
+        
+        self.lblSellProperty4 = QLabel(self)
+        self.lblSellProperty4.setText("Satış Ücreti: ")
+        self.lblSellProperty4.setFixedSize(250, 30)
+        self.lblSellProperty4.move(1450, 780)
+        self.lblSellProperty4.setFont(self.myFont)
+        self.lblSellProperty4.setVisible(True)
+        
+        self.txtSell2 = QLineEdit(self)
+        self.txtSell2.move(1560, 780)
+        self.txtSell2.resize(60, 30)
+        self.txtSell2.setVisible(True)
+        
+        
+        
+        self.myFont.setPointSize(8)
+        self.btnSellProperty2 = QPushButton(self)
+        self.btnSellProperty2.setText("Satılığa Çıkar")
+        self.btnSellProperty2.setFont(self.myFont)
+        self.btnSellProperty2.clicked.connect(self.sellProperty2)
+        self.btnSellProperty2.setFixedSize(120, 60)
+        self.btnSellProperty2.move(1540, 825)
+        self.btnSellProperty2.setVisible(True)
+        
+        
+        
+    def sellProperty2(self):
+        text = self.txtSell.text() + " no'lu alan satılığa çıkarıldı"
+        lblIslem = QLabel(self)
+        lblIslem.setText(text)
+        oyuncuList[oyunSırası-1].islemList.append(lblIslem)
+        
+        
+        if len(oyuncuList[oyunSırası-1].islemList) == 1:
+            oyuncuList[oyunSırası-1].islemList[-1].move(900, 600)
+            oyuncuList[oyunSırası-1].islemList[-1].setFixedSize(400, 30)
+            oyuncuList[oyunSırası-1].islemList[-1].setFont(self.myFont)        
+            oyuncuList[oyunSırası-1].islemList[-1].setVisible(True)
+        else:
+            y = oyuncuList[oyunSırası-1].islemList[-2].geometry().y()
+            oyuncuList[oyunSırası-1].islemList[-1].move(900, y+30)
+            oyuncuList[oyunSırası-1].islemList[-1].setFixedSize(400, 30)
+            oyuncuList[oyunSırası-1].islemList[-1].setFont(self.myFont)        
+            oyuncuList[oyunSırası-1].islemList[-1].setVisible(True)
+        
+        
+        cursor = connection.cursor()
+        cursor.execute("SELECT alan_türü FROM alan_bilgileri WHERE alan_kare_no = %s",(str(self.txtSell.text())))
+        alanTuru = cursor.fetchone()
+        cursor.close()
+        if alanTuru:
+            alanTuru = alanTuru[0]
+        
+        insert_boyut = "INSERT INTO satılık_alan_bilgileri (alan_kare_no, satış_fiyatı, komisyon, satan_emlak_no, alan_türü) VALUES (%s, %s, %s, %s, %s)"
+        inserted_values = (self.txtSell.text(), str(self.txtSell2.text()), str(komisyon), str(self.txtSell1.text()), str(alanTuru))
+        cursor = connection.cursor()
+        cursor.execute(insert_boyut, inserted_values)
+        cursor.close()
+        
+
+        self.lblSellProperty.close()
+        self.lblSellProperty2.close()
+        self.lblSellProperty1.close()
+        self.txtSell.close()
+        self.lblSellProperty3.close()
+        self.txtSell1.close()
+        self.lblSellProperty4.close()
+        self.txtSell2.close()
+        self.btnSellProperty2.close()
+        
+        
+        
+        
+        
+        self.btnBuyProperty.setVisible(True)
+        self.btnRentProperty.setVisible(True)
+        self.btnSellProperty.setVisible(True)
+        self.btnLetProperty.setVisible(True)
+        self.btnBuyFood.setVisible(True)
+        self.btnBuyItem.setVisible(True)
+        self.btnChangePlayer.setVisible(True)
+        self.btnIsKur.setVisible(True)
+        self.btnIsegir.setVisible(True)
+    
     
     
     
@@ -696,6 +1008,129 @@ class yonetici(QWidget):
         self.btnChangePlayer.setVisible(False)
         self.btnIsKur.setVisible(False)
         self.btnIsegir.setVisible(False)
+        
+        
+        
+        textLet = "Sahip olduğunuz alanlar: "
+        
+        x = int(self.txtX.text())
+        y = int(self.txtY.text())
+        
+        for arsa in oyuncuList[oyunSırası-1].properties:
+            textLet += str(arsa) + ", "
+        
+        for market in oyuncuList[oyunSırası-1].marketList:
+            textLet += str(market) + ", "
+            
+        for magaza in oyuncuList[oyunSırası-1].magazaList:
+            textLet += str(magaza)
+            
+        for emlak in oyuncuList[oyunSırası-1].emlakList:
+            textLet += str(emlak)
+            
+        textEmlak = "Emlakçılar: "
+        
+        cursor = connection.cursor()
+        cursor.execute("SELECT alan_kare_no FROM alan_bilgileri WHERE alan_türü = %s", (str("Emlak"),))
+        emlakcı = cursor.fetchall()
+        cursor.close()
+        if emlakcı:
+            for i in range(len(emlakcı)):
+                emlakcı[i] = emlakcı[i][0]
+                textEmlak += str(emlakcı[i]) + ", "
+        
+        self.lblLetProperty = QLabel(self)
+        self.lblLetProperty.setText(textLet)
+        self.lblLetProperty.setFixedSize(900, 70)
+        self.lblLetProperty.move(1200, 670)
+        self.lblLetProperty.setFont(self.myFont)
+        self.lblLetProperty.setVisible(True)
+        
+        self.lblLetProperty2 = QLabel(self)
+        self.lblLetProperty2.setText(textEmlak)
+        self.lblLetProperty2.setFixedSize(900, 70)
+        self.lblLetProperty2.move(1200, 720)
+        self.lblLetProperty2.setFont(self.myFont)
+        self.lblLetProperty2.setVisible(True)
+        
+        
+        self.lblLetProperty1 = QLabel(self)
+        self.lblLetProperty1.setText("Kiraya Vereceğiniz Alan: ")
+        self.lblLetProperty1.setFixedSize(250, 30)
+        self.lblLetProperty1.move(1450, 700)
+        self.lblLetProperty1.setFont(self.myFont)
+        self.lblLetProperty1.setVisible(True)
+        
+        self.txtLet = QLineEdit(self)
+        self.txtLet.move(1560, 700)
+        self.txtLet.resize(60, 30)
+        self.txtLet.setVisible(True)
+        
+        
+        self.lblLetProperty3 = QLabel(self)
+        self.lblLetProperty3.setText("Emlakçı: ")
+        self.lblLetProperty3.setFixedSize(250, 30)
+        self.lblLetProperty3.move(1450, 740)
+        self.lblLetProperty3.setFont(self.myFont)
+        self.lblLetProperty3.setVisible(True)
+        
+        self.txtLet1 = QLineEdit(self)
+        self.txtLet1.move(1560, 740)
+        self.txtLet1.resize(60, 30)
+        self.txtLet1.setVisible(True)
+        
+        
+        self.lblLetProperty4 = QLabel(self)
+        self.lblLetProperty4.setText("Kira Ücreti: ")
+        self.lblLetProperty4.setFixedSize(250, 30)
+        self.lblLetProperty4.move(1450, 780)
+        self.lblLetProperty4.setFont(self.myFont)
+        self.lblLetProperty4.setVisible(True)
+        
+        self.txtLet2 = QLineEdit(self)
+        self.txtLet2.move(1560, 780)
+        self.txtLet2.resize(60, 30)
+        self.txtLet2.setVisible(True)
+        
+        
+        
+        self.myFont.setPointSize(8)
+        self.btnLetProperty2 = QPushButton(self)
+        self.btnLetProperty2.setText("Kiralığa Çıkar")
+        self.btnLetProperty2.setFont(self.myFont)
+        self.btnLetProperty2.clicked.connect(self.letProperty2)
+        self.btnLetProperty2.setFixedSize(120, 60)
+        self.btnLetProperty2.move(1540, 825)
+        self.btnLetProperty2.setVisible(True)
+        
+    
+    def letProperty2(self):
+        insert_boyut = "INSERT INTO kiralama_bilgileri (alan_kare_no, emlak_kare_no, kira_ücreti, alan_sahibi) VALUES (%s, %s, %s, %s)"
+        inserted_values = (str(self.txtLet.text()), str(self.txtLet1.text()), str(self.txtLet2.text()), oyuncuList[oyunSırası-1].no)
+        cursor = connection.cursor()
+        cursor.execute(insert_boyut, inserted_values)
+        cursor.close()
+        
+        
+        self.lblLetProperty.close()
+        self.lblLetProperty2.close()
+        self.lblLetProperty1.close()
+        self.txtLet.close()
+        self.lblLetProperty3.close()
+        self.txtLet1.close()
+        self.lblLetProperty4.close()
+        self.txtLet2.close()
+        self.btnLetProperty2.close()
+        
+        self.btnBuyProperty.setVisible(True)
+        self.btnRentProperty.setVisible(True)
+        self.btnSellProperty.setVisible(True)
+        self.btnLetProperty.setVisible(True)
+        self.btnBuyFood.setVisible(True)
+        self.btnBuyItem.setVisible(True)
+        self.btnChangePlayer.setVisible(True)
+        self.btnIsKur.setVisible(True)
+        self.btnIsegir.setVisible(True)
         
     
             
@@ -716,18 +1151,18 @@ class yonetici(QWidget):
         marketList = cursor.fetchall()
         cursor.close()
         
-        text = "Marketler: "
+        textBuyFood = "Marketler: "
         
         for market in marketList:
-            text += str(market) + ", "
+            textBuyFood += str(market) + ", "
         
         x = int(self.txtX.text())
         y = int(self.txtY.text())
         
-        text += str(x*y-1+1)
+        textBuyFood += str(x*y-1+1)
         
         self.lblBuyFood = QLabel(self)
-        self.lblBuyFood.setText(text)
+        self.lblBuyFood.setText(textBuyFood)
         self.lblBuyFood.setFixedSize(250, 70)
         self.lblBuyFood.move(1450, 700)
         self.lblBuyFood.setFont(self.myFont)
@@ -870,19 +1305,19 @@ class yonetici(QWidget):
         mağazaList = cursor.fetchall()
         cursor.close()
         
-        text = "Mağazalar: "
+        textBuyItem = "Mağazalar: "
         
         for mağaza in mağazaList:
-            text += str(mağaza) + ", "
+            textBuyItem += str(mağaza) + ", "
         
         x = int(self.txtX.text())
         y = int(self.txtY.text())
         
-        text += str(x*y-2+1)
+        textBuyItem += str(x*y-2+1)
         
         
         self.lblBuyItem = QLabel(self)
-        self.lblBuyItem.setText(text)
+        self.lblBuyItem.setText(textBuyItem)
         self.lblBuyItem.setFixedSize(250, 70)
         self.lblBuyItem.move(1450, 700)
         self.lblBuyItem.setFont(self.myFont)
@@ -1018,13 +1453,13 @@ class yonetici(QWidget):
         self.btnIsKur.setVisible(False)
         self.btnIsegir.setVisible(False)
 
-        text = "Arsalar: "
+        textIskur = "Arsalar: "
         
         for arsa in oyuncuList[oyunSırası-1].properties:
-            text += arsa + ", "
+            textIskur += arsa + ", "
         
         self.lblIskur = QLabel(self)
-        self.lblIskur.setText(text)
+        self.lblIskur.setText(textIskur)
         self.lblIskur.setFixedSize(900, 70)
         self.lblIskur.move(1500, 700)
         self.lblIskur.setFont(self.myFont)
@@ -1265,7 +1700,7 @@ class yonetici(QWidget):
         
         
         insert_boyut = "INSERT INTO işletme_bilgileri (alan_kare_no, işletme_seviyesi, çalışan_kapasitesi, çalışan_sayısı, sabit_gelir_miktarı, sabit_gelir_oranı, işletme_türü, maas, başlangıç_saati, bitiş_saati) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-        inserted_values = (self.txtIsletme.text(), str(1), str(3), str(0), str(50), str(50), str("Market"), str(self.txtMaas.text()), str(self.txtSaat1.text()), str(self.txtSaat2.text()))
+        inserted_values = (self.txtIsletme.text(), str(1), str(3), str(0), str(50), str(50), str("Mağaza"), str(self.txtMaas.text()), str(self.txtSaat1.text()), str(self.txtSaat2.text()))
         cursor = connection.cursor()
         cursor.execute(insert_boyut, inserted_values)
         cursor.close()
@@ -1337,7 +1772,7 @@ class yonetici(QWidget):
         
         updateQuery = "UPDATE alan_bilgileri SET alan_türü = %s WHERE alan_kare_no = %s"
         cursor = connection.cursor()
-        cursor.execute(updateQuery, (str("Emlakçı"), str(self.txtIsletme.text())))
+        cursor.execute(updateQuery, (str("Emlak"), str(self.txtIsletme.text())))
         cursor.close()
         
         cursor = connection.cursor()
@@ -1364,7 +1799,7 @@ class yonetici(QWidget):
         
         
         insert_boyut = "INSERT INTO işletme_bilgileri (alan_kare_no, işletme_seviyesi, çalışan_kapasitesi, çalışan_sayısı, sabit_gelir_miktarı, sabit_gelir_oranı, işletme_türü, maas, başlangıç_saati, bitiş_saati) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-        inserted_values = (self.txtIsletme.text(), str(1), str(3), str(0), str(50), str(50), str("Market"), str(self.txtMaas.text()))
+        inserted_values = (self.txtIsletme.text(), str(1), str(3), str(0), str(50), str(50), str("Emlak"), str(self.txtMaas.text()), str(self.txtSaat1.text()), str(self.txtSaat2.text()))
         cursor = connection.cursor()
         cursor.execute(insert_boyut, inserted_values)
         cursor.close()
@@ -1410,7 +1845,7 @@ class yonetici(QWidget):
         self.btnIsegir.setVisible(False)
         
 
-        text = "İşletmeler: "
+        textIs = "İşletmeler: "
         for oyuncu in oyuncuList:
             for market in oyuncu.marketList:
                 cursor = connection.cursor()
@@ -1428,7 +1863,7 @@ class yonetici(QWidget):
                 cursor.close()
 
                 if int(calisan) != int(kapasite):
-                    text += market + ", "
+                    textIs += market + ", "
                     
             for magaza in oyuncu.magazaList:
                 cursor = connection.cursor()
@@ -1446,7 +1881,7 @@ class yonetici(QWidget):
                 cursor.close()
 
                 if int(calisan) != int(kapasite):
-                    text += magaza + ", "
+                    textIs += magaza + ", "
                     
             for emlak in oyuncu.emlakList:
                 cursor = connection.cursor()
@@ -1464,11 +1899,11 @@ class yonetici(QWidget):
                 cursor.close()
 
                 if int(calisan) != int(kapasite):
-                    text += emlak + ", "
+                    textIs += emlak + ", "
         
         
         self.lblIsegir = QLabel(self)
-        self.lblIsegir.setText(text)
+        self.lblIsegir.setText(textIs)
         self.lblIsegir.setFixedSize(900, 70)
         self.lblIsegir.move(1500, 700)
         self.lblIsegir.setFont(self.myFont)
@@ -1701,33 +2136,6 @@ class yonetici(QWidget):
                         
                     
                 
-                """
-                cursor = connection.cursor()
-                cursor.execute("SELECT alan_sahibi_no FROM alan_bilgileri WHERE alan_türü != %s AND alan_sahibi_no != %s", (str("Arsa"), str(0)))
-                liste = cursor.fetchall()
-                if liste:
-                    for i in range(len(liste)):
-                        liste[i] = liste[i][0]
-                cursor.close()
-                kume = list(set(liste))
-                
-                for i in range(len(kume)):
-                    sayı = liste.count(kume[i])
-
-                    cursor = connection.cursor()
-                    cursor.execute("SELECT kalan_para FROM kullanıcı_bilgileri WHERE no = %s",(str(kume[i])))
-                    currPara = cursor.fetchone()
-                    cursor.close()
-                    if currPara:
-                        currPara = int(currPara[0])
-                        currPara += (self.fark * sayı * sabitGelir)
-
-                    updateQuery = "UPDATE kullanıcı_bilgileri SET kalan_para = %s WHERE no = %s"
-                    cursor = connection.cursor()
-                    cursor.execute(updateQuery, (str(currPara), str(kume[i])))
-                    oyuncuList[i].money = currPara
-                    cursor.close()
-                    """
 
                 for i in range(length):
                     cursor = connection.cursor()
